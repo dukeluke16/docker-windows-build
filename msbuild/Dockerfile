@@ -3,13 +3,13 @@ FROM microsoft/dotnet-framework:4.6.2
 MAINTAINER Luke Thompson <luke@dukeluke.com>
 LABEL Description="This image provides a dockerized build environment containing msbuild."
 
-# Use the latest Windows Server Core image with .NET Framework 4.7.1.
+# Use the latest Windows Server Core image with .NET Framework 4.6.2.
 FROM microsoft/dotnet-framework:4.6.2
 
 # Restore the default Windows shell for correct batch processing below.
 SHELL ["cmd", "/S", "/C"]
 
-# Download the Build Tools bootstrapper.
+# Download the Build Tools bootstrapper from vs15 aka Visual Studio 2017.
 ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
 
 # Install Build Tools excluding workloads and components with known issues.
