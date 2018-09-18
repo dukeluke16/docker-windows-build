@@ -1,7 +1,7 @@
 # Pull base image.
 FROM microsoft/dotnet-framework:4.6.2
 MAINTAINER Luke Thompson <luke@dukeluke.com>
-LABEL Description="This image provides a dockerized build environment containing msbuild."
+LABEL Description="Visual Studio 2017 Build Tools (v15.0) with .NET 4.6.2"
 
 # Use the latest Windows Server Core image with .NET Framework 4.6.2.
 FROM microsoft/dotnet-framework:4.6.2
@@ -10,6 +10,7 @@ FROM microsoft/dotnet-framework:4.6.2
 SHELL ["cmd", "/S", "/C"]
 
 # Download the Build Tools bootstrapper from vs15 aka Visual Studio 2017.
+RUN mkdir C:\TEMP
 ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
 
 # Install Build Tools excluding workloads and components with known issues.
@@ -21,6 +22,9 @@ RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
     --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 \
     --remove Microsoft.VisualStudio.Component.Windows81SDK \
  || IF "%ERRORLEVEL%"=="3010" EXIT 0
+
+# Cleanup
+RUN rmdir /Q /S C:\TEMP
 
 # Set Entrypoint - Start developer command prompt with any other commands specified.
 ENTRYPOINT C:\BuildTools\Common7\Tools\VsDevCmd.bat &&
