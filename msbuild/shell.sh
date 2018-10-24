@@ -7,7 +7,7 @@ then
 fi
 
 REGISTRY=dukeluke16
-IMAGE_NAME=msbuild-vs15
+IMAGE_NAME=vs15-build
 TAG=$1
 
 if [ -z $TAG ]

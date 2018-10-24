@@ -1,32 +1,30 @@
 # Pull base image.
-FROM microsoft/dotnet-framework:4.6.2
+FROM microsoft/windowsservercore:ltsc2016
 MAINTAINER Luke Thompson <luke@dukeluke.com>
-LABEL Description="Visual Studio 2017 Build Tools (v15.0) with .NET 4.6.2"
+LABEL Description="Visual Studio 2017 Build Tools (v15.0)"
 
-# Use the latest Windows Server Core image with .NET Framework 4.6.2.
-FROM microsoft/dotnet-framework:4.6.2
+# Copy our Install script.
+COPY Install.cmd C:\\TEMP\\Install.cmd
 
-# Restore the default Windows shell for correct batch processing below.
-SHELL ["cmd", "/S", "/C"]
+# Download collect.exe in case of an install failure.
+ADD https://aka.ms/vscollect.exe C:\\TEMP\\collect.exe
 
-# Download the Build Tools bootstrapper from vs15 aka Visual Studio 2017.
-RUN mkdir C:\TEMP
-ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
+# Use the latest release channel. For more control, specify the location of an internal layout.
+ARG CHANNEL_URL=https://aka.ms/vs/15/release/channel
+ADD ${CHANNEL_URL} C:\\TEMP\\VisualStudio.chman
 
-# Install Build Tools excluding workloads and components with known issues.
-RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
-    --installPath C:\BuildTools \
+# Download and install Build Tools excluding workloads and components with known issues.
+ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\\TEMP\\vs_buildtools.exe
+RUN C:\\TEMP\\Install.cmd  C:\\TEMP\\vs_buildtools.exe --quiet --wait --norestart --nocache \
+    --installPath C:\\BuildTools \
+    --channelUri C:\TEMP\VisualStudio.chman \
     --all \
     --remove Microsoft.VisualStudio.Component.Windows10SDK.10240 \
     --remove Microsoft.VisualStudio.Component.Windows10SDK.10586 \
     --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 \
-    --remove Microsoft.VisualStudio.Component.Windows81SDK \
- || IF "%ERRORLEVEL%"=="3010" EXIT 0
+    --remove Microsoft.VisualStudio.Component.Windows81SDK
 
-# Cleanup
-RUN rmdir /Q /S C:\TEMP
-
-# Set Entrypoint - Start developer command prompt with any other commands specified.
+# Start developer command prompt with any other commands specified.
 ENTRYPOINT C:\BuildTools\Common7\Tools\VsDevCmd.bat &&
 
 # Default to PowerShell if no other command specified.
